@@ -1,128 +1,263 @@
 import java.util.Scanner;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int cnt = 0;
-        int n = sc.nextInt();
-        int m = sc.nextInt();
+class Gear {
+    private int[] gear;
+    private int northPointer;
 
-        int[][] walls = new int[n][m];
+    public Gear(int[] gear) {
+        this.gear = gear;
+        this.northPointer = 0;
+    }
 
-        int x, y, dir;
+    public int getNorthVal() {
+        return gear[northPointer];
+    }
 
-        x = sc.nextInt();
-        y = sc.nextInt();
-        dir = sc.nextInt();
+    public int getEastVal() {
+        return gear[(northPointer + 2) % 8];
+    }
 
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < m; j++) {
-                walls[i][j] = sc.nextInt();
+    public int getWestVal() {
+        return gear[(northPointer + 6) % 8];
+    }
+
+    public void rotate(int dir) {
+        if (dir == 1) {
+            northPointer = (northPointer + 7) % 8;
+        }
+        else {
+            northPointer = (northPointer + 1) % 8;
+        }
+    }
+}
+
+class GearRotator {
+    Gear[] gears;
+
+    public GearRotator(Gear[] gears) {
+        this.gears = gears;
+    }
+
+    public void rotate(int gearNum, int dir) {
+        boolean firstGear = gears[0].getEastVal() != gears[1].getWestVal();
+        boolean secondGear = gears[1].getEastVal() != gears[2].getWestVal();
+        boolean thirdGear = gears[2].getEastVal() != gears[3].getWestVal();
+
+        //홀 양 시, 음 짝
+        int directionVal = gearNum * dir;
+
+        if ((directionVal > 0 && (directionVal & 1) == 1) || (directionVal < 0 && (directionVal & 1) == 0)) {
+            if (gearNum == 1) {
+                gears[0].rotate(dir);
+
+                if (firstGear) {
+                    gears[1].rotate(dir*-1);
+                }
+                else {
+                    return;
+                }
+
+                if (secondGear) {
+                    gears[2].rotate(dir);
+                }
+                else {
+                    return;
+                }
+
+                if (thirdGear) {
+                    gears[3].rotate(dir*-1);
+                }
+                else {
+                    return;
+                }
             }
-        } //문제 입력 완료
 
-        while(true) {
-            //조건 1
-            if (isEmptyRoom(x, y, walls)) {
-                cleanRoom(x, y, walls);
-                cnt++;
+            else if (gearNum == 2) {
+                gears[1].rotate(dir);
+
+                if (firstGear) {
+                    gears[0].rotate(dir*-1);
+                }
+
+
+                if (secondGear) {
+                    gears[2].rotate(dir * -1);
+                }
+                else {
+                    return;
+                }
+
+                if (thirdGear) {
+                    gears[3].rotate(dir);
+                }
+                else {
+                    return;
+                }
+            }
+            else if (gearNum == 3) {
+                gears[2].rotate(dir);
+
+                if (thirdGear) {
+                    gears[3].rotate(dir * -1);
+                }
+
+                if (secondGear) {
+                    gears[1].rotate(dir * -1);
+                }
+                else {
+                    return;
+                }
+
+                if (firstGear) {
+                    gears[0].rotate(dir);
+                }
             }
 
-            //조건 2
-            if (isCleanedRoom4(x, y, walls)) {
-                if (dir == 0) {
-                    if (!isWall(x+1, y, walls)) {
-                        x += 1;
-                    }
-                    else {
-                        System.out.println(cnt);
-                        return;
-                    }
-                }//북쪽을 향하고, 남쪽이 비었다면 조건 1로 돌아가기
-                else if (dir == 1) {
-                    if (!isWall(x, y-1, walls)) {
-                        y -= 1;
-                    }
-                    else {
-                        System.out.println(cnt);
-                        return;
-                    }
-                }//동쪽을 향하고, 서쪽이 비었다면 조건 1로 돌아가기
-                else if (dir == 2) {
-                    if (!isWall(x-1, y, walls)) {
-                        x -= 1;
-                    }
-                    else {
-                        System.out.println(cnt);
-                        return;
-                    }
-                }//남쪽을 향하고, 북쪽이 비었다면 조건 1로 돌아가기
-                else if (dir == 3) {
-                    if (!isWall(x, y+1, walls)) {
-                        y += 1;
-                    }
-                    else {
-                        System.out.println(cnt);
-                        return;
-                    }
-                }//서쪽을 향하고, 동쪽이 비었다면 조건 1로 돌아가기
+            else if (gearNum == 4) {
+                gears[3].rotate(dir);
+
+                if (thirdGear) {
+                    gears[2].rotate(dir * -1);
+                } else {
+                    return;
+                }
+
+                if (secondGear) {
+                    gears[1].rotate(dir);
+                } else {
+                    return;
+                }
+
+                if (firstGear) {
+                    gears[0].rotate(dir*-1);
+                }
+            }
+        }
+        //홀 음 반, 양 짝
+        else {
+            if (gearNum == 1) {
+                gears[0].rotate(dir);
+
+                if (firstGear) {
+                    gears[1].rotate(dir*-1);
+                }
+                else {
+                    return;
+                }
+
+                if (secondGear) {
+                    gears[2].rotate(dir);
+                }
+                else {
+                    return;
+                }
+
+                if (thirdGear) {
+                    gears[3].rotate(dir*-1);
+                }
+                else {
+                    return;
+                }
             }
 
-            //조건 3
-            else if (isEmptyDir4(x, y, walls)){
-                dir = (dir + 3) % 4;
+            else if (gearNum == 2) {
+                gears[1].rotate(dir);
 
-                if (dir == 0 & isEmptyRoom(x-1, y, walls)) {
-                    x -= 1;
-                } else if (dir == 1 & isEmptyRoom(x, y+1, walls)) {
-                    y += 1;
-                } else if (dir == 2 & isEmptyRoom(x+1, y, walls)) {
-                    x += 1;
-                } else if (dir == 3 & isEmptyRoom(x, y-1, walls)) {
-                    y -= 1;
+                if (firstGear) {
+                    gears[0].rotate(dir*-1);
+                }
+
+
+                if (secondGear) {
+                    gears[2].rotate(dir * -1);
+                }
+                else {
+                    return;
+                }
+
+                if (thirdGear) {
+                    gears[3].rotate(dir);
+                }
+                else {
+                    return;
+                }
+            }
+            else if (gearNum == 3) {
+                gears[2].rotate(dir);
+
+                if (thirdGear) {
+                    gears[3].rotate(dir * -1);
+                }
+
+                if (secondGear) {
+                    gears[1].rotate(dir * -1);
+                }
+                else {
+                    return;
+                }
+
+                if (firstGear) {
+                    gears[0].rotate(dir);
+                }
+            }
+
+            else if (gearNum == 4) {
+                gears[3].rotate(dir);
+
+                if (thirdGear) {
+                    gears[2].rotate(dir * -1);
+                } else {
+                    return;
+                }
+
+                if (secondGear) {
+                    gears[1].rotate(dir);
+                } else {
+                    return;
+                }
+
+                if (firstGear) {
+                    gears[0].rotate(dir*-1);
                 }
             }
         }
     }
+}
 
-    /**
-     * 2차원 int 배열 출력
-     * @param array 2차원 int 배열
-     */
-    private static void printArray(int[][] array) {
-        for (int[] wall : array) {
-            for (int i : wall) {
-                System.out.print(i + " ");
-            }
-            System.out.println();
+public class Main {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        //문제 입력
+        Gear[] gear = new Gear[4];
+        for (int i = 0; i < 4; i++) {
+            String gears = sc.next();
+            gear[i] = new Gear(makeGear(gears));
         }
+
+        int cnt = sc.nextInt();//횟수
+        GearRotator rotator = new GearRotator(gear);
+        for (int i = 0; i < cnt; i++) {
+            int gearNum = sc.nextInt();
+            int dir = sc.nextInt();
+
+            rotator.rotate(gearNum, dir);
+        }
+
+        int sum = 0;
+
+        for (int i = 0; i < 4; i++) {
+            sum += gear[i].getNorthVal() * (1 << i);
+        }
+        System.out.println(sum);
     }
 
-    /**
-     * 2차원 배열의 array[x][y] 값이 0임을 확인
-     *
-     * @param x 현재 x값
-     * @param y 현재 y 값
-     * @param array 2차원 int 배열
-     * @return array[x][y] == 0
-     */
-    private static boolean isEmptyRoom(int x, int y, int[][] array) {
-        return array[x][y] == 0;
-    }
-
-    private static boolean isWall(int x, int y, int[][] array) {
-        return array[x][y] == 1;
-    }
-
-    private static void cleanRoom(int x, int y, int[][] array) {
-        array[x][y] = 2;
-    }
-
-    private static boolean isCleanedRoom4(int x, int y, int[][] array) {
-        return array[x-1][y] != 0 && array[x+1][y] != 0 && array[x][y-1] != 0 && array[x][y+1] != 0;
-    }
-
-    private static boolean isEmptyDir4(int x, int y, int[][] array) {
-        return array[x-1][y] == 0 || array[x+1][y]== 0 || array[x][y-1]==0 || array[x][y+1]==0;
+    private static int[] makeGear(String str) {
+        String[] split = str.split("");
+        int[] gear = new int[split.length];
+        for (int i = 0; i < split.length; i++) {
+            gear[i] = Integer.parseInt(split[i]);
+        }
+        return gear;
     }
 }
